@@ -10,29 +10,60 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware((auth, req) => {
-  const a = auth();
-  const path = req.nextUrl.pathname;
-  const isOnboarding = path.startsWith("/onboarding");
-  const isOrgPage = /^\/organization\/[^/]+\/?$/.test(path);
+  const authResult = auth();
+  const { userId, orgId, orgSlug, sessionClaims, organization } = authResult;
+  const pathname = req.nextUrl.pathname;
+  const isOnboarding = pathname.startsWith("/onboarding");
+  const isOrgPage = /^\/organization\/[^/]+\/?$/.test(pathname);
 
-  // Chưa đăng nhập nhưng vào route cần bảo vệ -> Sign in
-  if (!a.userId && isProtectedRoute(req)) {
+  // Extract org data from session claims if not in auth context
+  const orgFromClaims = sessionClaims?.o;
+  const effectiveOrgId = orgId || orgFromClaims?.id;
+  const effectiveOrgSlug = orgSlug || orgFromClaims?.slg;
+
+  if (!userId && isProtectedRoute(req)) {
     return auth().redirectToSignIn({ returnBackUrl: req.url });
   }
 
-  // Đã đăng nhập nhưng CHƯA có active org:
-  // - Cho phép ở "/" (home), "/onboarding" và "/organization/:slug" (để user tự chọn)
-  if (a.userId && !a.orgId) {
-    if (path === "/" || isOnboarding || isOrgPage) {
-      return NextResponse.next();
-    }
-    // Các route bảo vệ khác -> đưa về onboarding để chọn org
-    const url = req.nextUrl.clone();
-    url.pathname = "/onboarding";
-    return NextResponse.redirect(url);
+  // Special handling for onboarding - always allow
+  if (isOnboarding) {
+    return NextResponse.next();
   }
 
-  // Mặc định cho qua
+  if (userId && !effectiveOrgId) {    
+    if (pathname === "/" || isOrgPage) {
+      return NextResponse.next();
+    }
+    
+    if (isProtectedRoute(req)) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/onboarding";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // If user has org and is on root, redirect to org (unless they want to access onboarding)
+  if (userId && (effectiveOrgId || effectiveOrgSlug) && pathname === "/") {
+    // Check if user wants to access onboarding or switch orgs
+    const searchParams = req.nextUrl.searchParams;
+    const allowRoot = searchParams.get("redirect") === "false" || searchParams.get("onboarding") === "true";
+    
+    if (!allowRoot) {
+      const slug = effectiveOrgSlug || organization?.slug;
+      if (slug) {
+        return NextResponse.redirect(new URL(`/organization/${slug}`, req.url));
+      }
+    }
+  }
+
+  // If accessing org page but with wrong slug, redirect to correct one
+  if (userId && effectiveOrgSlug && isOrgPage) {
+    const currentSlug = pathname.split('/')[2];
+    if (currentSlug !== effectiveOrgSlug) {
+      return NextResponse.redirect(new URL(`/organization/${effectiveOrgSlug}`, req.url));
+    }
+  }
+
   return NextResponse.next();
 });
 

@@ -1,6 +1,7 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getOrganization as getOrgById } from "@/actions/organizations";
+import OrgSwitcher from "@/components/org-switcher";
 
 async function getOrganizationBySlugOrId(slugOrId) {
   if (slugOrId?.startsWith?.("org_")) {
@@ -10,7 +11,7 @@ async function getOrganizationBySlugOrId(slugOrId) {
     } catch (_) {}
   }
   try {
-    const org = await clerkClient.organizations.getOrganization({
+    const org = await clerkClient().organizations.getOrganization({
       slug: slugOrId,
     });
     return org ?? null;
@@ -40,7 +41,7 @@ export default async function OrganizationPage({ params }) {
           {organization.name}&rsquo;s Projects
         </h1>
 
-        {/* <OrgSwitcher /> */}
+        <OrgSwitcher />
       </div>
       <div className="mb-4">
         {/* <ProjectList orgId={organization.id} /> */}

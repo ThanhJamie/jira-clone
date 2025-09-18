@@ -14,7 +14,7 @@ async function Header() {
   return (
     <header className="container mx-auto">
       <nav className="py-6 px-4 flex justify-between items-center">
-        <Link href="/">
+        <Link href="/?redirect=false">
           <Image
             src={"/logo2.png"}
             alt="Zcrum Logo"
