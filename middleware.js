@@ -30,11 +30,11 @@ export default clerkMiddleware((auth, req) => {
     return NextResponse.next();
   }
 
-  if (userId && !effectiveOrgId) {    
+  if (userId && !effectiveOrgId) {
     if (pathname === "/" || isOrgPage) {
       return NextResponse.next();
     }
-    
+
     if (isProtectedRoute(req)) {
       const url = req.nextUrl.clone();
       url.pathname = "/onboarding";
@@ -46,8 +46,10 @@ export default clerkMiddleware((auth, req) => {
   if (userId && (effectiveOrgId || effectiveOrgSlug) && pathname === "/") {
     // Check if user wants to access onboarding or switch orgs
     const searchParams = req.nextUrl.searchParams;
-    const allowRoot = searchParams.get("redirect") === "false" || searchParams.get("onboarding") === "true";
-    
+    const allowRoot =
+      searchParams.get("redirect") === "false" ||
+      searchParams.get("onboarding") === "true";
+
     if (!allowRoot) {
       const slug = effectiveOrgSlug || organization?.slug;
       if (slug) {
@@ -58,9 +60,11 @@ export default clerkMiddleware((auth, req) => {
 
   // If accessing org page but with wrong slug, redirect to correct one
   if (userId && effectiveOrgSlug && isOrgPage) {
-    const currentSlug = pathname.split('/')[2];
+    const currentSlug = pathname.split("/")[2];
     if (currentSlug !== effectiveOrgSlug) {
-      return NextResponse.redirect(new URL(`/organization/${effectiveOrgSlug}`, req.url));
+      return NextResponse.redirect(
+        new URL(`/organization/${effectiveOrgSlug}`, req.url)
+      );
     }
   }
 

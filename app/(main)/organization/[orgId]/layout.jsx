@@ -14,19 +14,26 @@ export default function OrgActivatorLayout({ children }) {
     if (!isLoaded || !auth.isLoaded || tried.current) return;
 
     const orgs = organizationList?.data ?? [];
-    
+
     // Try to find org by slug first
-    const matchBySlug = orgs.find((o) => o.organization.slug === orgId)?.organization;
-    
+    const matchBySlug = orgs.find(
+      (o) => o.organization.slug === orgId
+    )?.organization;
+
     // If no match by slug, try by ID (in case orgId is actual ID)
-    const matchById = orgs.find((o) => o.organization.id === orgId)?.organization;
-    
+    const matchById = orgs.find(
+      (o) => o.organization.id === orgId
+    )?.organization;
+
     const match = matchBySlug || matchById;
-    
+
     if (!match) {
       // Check if we have org in session claims
       const orgFromSession = auth.sessionClaims?.o;
-      if (orgFromSession && (orgFromSession.slg === orgId || orgFromSession.id === orgId)) {
+      if (
+        orgFromSession &&
+        (orgFromSession.slg === orgId || orgFromSession.id === orgId)
+      ) {
         tried.current = true;
         setActive({ organization: orgFromSession.id }).catch(console.error);
         return;
@@ -39,8 +46,15 @@ export default function OrgActivatorLayout({ children }) {
       tried.current = true;
       setActive({ organization: match.id }).catch(console.error);
     }
-
-  }, [isLoaded, auth.isLoaded, auth.orgId, auth.sessionClaims, orgId, organizationList, setActive]);
+  }, [
+    isLoaded,
+    auth.isLoaded,
+    auth.orgId,
+    auth.sessionClaims,
+    orgId,
+    organizationList,
+    setActive,
+  ]);
 
   return <>{children}</>;
 }

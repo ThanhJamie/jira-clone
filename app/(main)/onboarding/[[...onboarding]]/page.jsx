@@ -32,7 +32,7 @@ export default function OnboardingPage() {
 
     // Check if we have org in session claims but not activated
     const orgFromSession = auth.sessionClaims?.o;
-    
+
     if (orgFromSession && !auth.orgId) {
       setActive({ organization: orgFromSession.id })
         .then(() => {
@@ -54,15 +54,22 @@ export default function OnboardingPage() {
         console.error("Failed to re-activate organization:", error);
       });
     }
-
-  }, [orgLoaded, listLoaded, auth.isLoaded, organization, auth.orgId, auth.sessionClaims, setActive]);
+  }, [
+    orgLoaded,
+    listLoaded,
+    auth.isLoaded,
+    organization,
+    auth.orgId,
+    auth.sessionClaims,
+    setActive,
+  ]);
 
   // Redirect if user already has an active organization
   useEffect(() => {
     // Only auto-redirect if user just created/selected an org (has post param)
     // Otherwise, let them stay on onboarding to switch organizations
     const post = search?.get("post");
-    
+
     if (!orgLoaded || !auth.isLoaded) {
       return;
     }
@@ -80,7 +87,7 @@ export default function OnboardingPage() {
     if (!listLoaded || !orgLoaded || !auth.isLoaded) {
       return;
     }
-    
+
     if (hasTriedAutoSelect.current) {
       return;
     }
@@ -89,12 +96,12 @@ export default function OnboardingPage() {
     const orgs = organizationList?.data ?? [];
 
     // Only auto-select in these specific cases:
-    // 1. Just created an org (post=created) 
+    // 1. Just created an org (post=created)
     // 2. Just selected an org (post=selected)
     // 3. User has NO organization and exactly one org exists
-    const shouldAutoSelect = 
-      post === "created" || 
-      post === "selected" || 
+    const shouldAutoSelect =
+      post === "created" ||
+      post === "selected" ||
       (!organization && !auth.orgId && orgs.length === 1);
 
     if (!shouldAutoSelect || orgs.length === 0) {
@@ -107,7 +114,7 @@ export default function OnboardingPage() {
     }
 
     hasTriedAutoSelect.current = true;
-    
+
     setActive({ organization: targetOrg.id })
       .then(() => {
         // Only redirect if it was due to a user action (post param)
@@ -121,8 +128,16 @@ export default function OnboardingPage() {
         console.error("Failed to activate org:", error);
         hasTriedAutoSelect.current = false;
       });
-
-  }, [listLoaded, orgLoaded, auth.isLoaded, organizationList, setActive, search, organization, auth.orgId]);
+  }, [
+    listLoaded,
+    orgLoaded,
+    auth.isLoaded,
+    organizationList,
+    setActive,
+    search,
+    organization,
+    auth.orgId,
+  ]);
 
   return (
     <div className="flex justify-center items-center pt-14">
