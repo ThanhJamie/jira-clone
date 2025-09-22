@@ -19,11 +19,15 @@ export const projectSchema = z.object({
     .optional(),
 });
 
-// export const issueSchema = z.object({
-//   title: z.string().min(1, "Issue title is required"),
-//   description: z.string().optional(),
-//   status: z.enum(["TODO", "IN_PROGRESS", "DONE"]),
-//   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
-//   assigneeId: z.string().optional(),
-//   projectId: z.string().min(1, "Project ID is required"),
-// });
+export const sprintSchema = z.object({
+  name: z.string().min(1, "Sprint name is required"),
+  startDate: z.date(),
+  endDate: z.date(),
+});
+
+export const issueSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  assigneeId: z.string().cuid("Please select assignee"),
+  description: z.string().optional(),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
+});

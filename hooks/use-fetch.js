@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-const useFetch = (cb) => {
+const useFetch = (cb, options = {}) => {
   const [data, setData] = useState(undefined);
   const [loading, setLoading] = useState(null);
   const [error, setError] = useState(null);
@@ -14,6 +14,11 @@ const useFetch = (cb) => {
       const response = await cb(...args);
       setData(response);
       setError(null);
+
+      // Show success toast if enabled
+      if (options.successMessage) {
+        toast.success(options.successMessage);
+      }
     } catch (error) {
       setError(error);
       toast.error(error.message);
