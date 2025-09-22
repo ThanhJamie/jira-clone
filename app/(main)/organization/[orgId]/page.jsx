@@ -2,6 +2,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getOrganization as getOrgById } from "@/actions/organizations";
 import OrgSwitcher from "@/components/org-switcher";
+import ProjectList from "./_components/project-list";
 
 async function getOrganizationBySlugOrId(slugOrId) {
   if (slugOrId?.startsWith?.("org_")) {
@@ -44,7 +45,7 @@ export default async function OrganizationPage({ params }) {
         <OrgSwitcher />
       </div>
       <div className="mb-4">
-        {/* <ProjectList orgId={organization.id} /> */}
+        <ProjectList orgId={organization.id} />
       </div>
       <div className="mt-8">{/* <UserIssues userId={userId} /> */}</div>
     </div>

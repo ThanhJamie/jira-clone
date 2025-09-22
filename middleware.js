@@ -10,9 +10,19 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware((auth, req) => {
+  const pathname = req.nextUrl.pathname;
+
+  // Skip processing for static files and Next.js internals
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon.ico") ||
+    (pathname.includes(".") && !pathname.startsWith("/api"))
+  ) {
+    return NextResponse.next();
+  }
+
   const authResult = auth();
   const { userId, orgId, orgSlug, sessionClaims, organization } = authResult;
-  const pathname = req.nextUrl.pathname;
   const isOnboarding = pathname.startsWith("/onboarding");
   const isOrgPage = /^\/organization\/[^/]+\/?$/.test(pathname);
 
@@ -68,12 +78,25 @@ export default clerkMiddleware((auth, req) => {
     }
   }
 
-  return NextResponse.next();
+  // Add org info to headers for server actions
+  const response = NextResponse.next();
+  if (effectiveOrgId) {
+    response.headers.set("x-clerk-org-id", effectiveOrgId);
+  }
+  if (effectiveOrgSlug) {
+    response.headers.set("x-clerk-org-slug", effectiveOrgSlug);
+  }
+
+  return response;
 });
 
 export const config = {
   matcher: [
+    // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // Always run for API routes
     "/(api|trpc)(.*)",
+    // Always run for all pages
+    "/",
   ],
 };

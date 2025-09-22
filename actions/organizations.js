@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/prisma";
+import { db } from "@/app/lib/prisma";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 
 export async function getOrganization(slug) {
