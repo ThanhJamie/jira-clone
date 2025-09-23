@@ -5,16 +5,21 @@ import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import UserMenu from "./user-menu";
 import { PenBox } from "lucide-react";
 import Image from "next/image";
-import { checkUser } from "@/lib/checkUser";
+import { checkUser } from "@/app/lib/checkUser";
 import UserLoading from "./user-loading";
 
 async function Header() {
-  await checkUser();
+  let user = null;
+  try {
+    user = await checkUser();
+  } catch (error) {
+    console.error("Header: checkUser failed:", error);
+  }
 
   return (
     <header className="container mx-auto">
       <nav className="py-6 px-4 flex justify-between items-center">
-        <Link href="/">
+        <Link href="/?redirect=false">
           <Image
             src={"/logo2.png"}
             alt="Zcrum Logo"
