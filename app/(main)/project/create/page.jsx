@@ -9,10 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import useFetch from "@/hooks/use-fetch";
-import { projectSchema } from "@/lib/validators";
 import { createProject } from "@/actions/projects";
 import { BarLoader } from "react-spinners";
 import OrgSwitcher from "@/components/org-switcher";
+import { projectSchema } from "@/app/lib/validators";
 
 export default function CreateProjectPage() {
   const router = useRouter();
