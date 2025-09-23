@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getOrganization as getOrgById } from "@/actions/organizations";
 import OrgSwitcher from "@/components/org-switcher";
 import ProjectList from "./_components/project-list";
+import UserIssues from "./_components/user-issue";
 
 async function getOrganizationBySlugOrId(slugOrId) {
   if (slugOrId?.startsWith?.("org_")) {
@@ -47,7 +48,9 @@ export default async function OrganizationPage({ params }) {
       <div className="mb-4">
         <ProjectList orgId={organization.id} />
       </div>
-      <div className="mt-8">{/* <UserIssues userId={userId} /> */}</div>
+      <div className="mt-8">
+        <UserIssues userId={userId} />
+      </div>
     </div>
   );
 }

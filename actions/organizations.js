@@ -2,6 +2,29 @@
 
 import { db } from "@/app/lib/prisma";
 import { auth, clerkClient } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
+
+async function getOrganizationId() {
+  const { userId, orgId, sessionClaims } = auth();
+
+  // Try multiple sources for orgId
+  let organizationId = orgId;
+
+  if (!organizationId && sessionClaims?.org_id) {
+    organizationId = sessionClaims.org_id;
+  }
+
+  if (!organizationId && sessionClaims?.o?.id) {
+    organizationId = sessionClaims.o.id;
+  }
+
+  if (!organizationId) {
+    const headersList = headers();
+    organizationId = headersList.get("x-clerk-org-id");
+  }
+
+  return { userId, organizationId };
+}
 
 export async function getOrganization(slug) {
   const { userId } = auth();
@@ -67,9 +90,9 @@ export async function getProjects(orgId) {
 }
 
 export async function getUserIssues(userId) {
-  const { orgId } = auth();
+  const { organizationId } = await getOrganizationId();
 
-  if (!userId || !orgId) {
+  if (!userId || !organizationId) {
     throw new Error("No user id or organization id found");
   }
 
@@ -85,7 +108,7 @@ export async function getUserIssues(userId) {
     where: {
       OR: [{ assigneeId: user.id }, { reporterId: user.id }],
       project: {
-        organizationId: orgId,
+        organizationId: organizationId,
       },
     },
     include: {

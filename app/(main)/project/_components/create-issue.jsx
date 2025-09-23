@@ -149,7 +149,7 @@ export default function IssueCreationDrawer({
             </label>
 
             <Controller
-              name="assigneeId"
+              name="description"
               control={control}
               render={({ field }) => (
                 <MDEditor value={field.value} onChange={field.onChange} />
